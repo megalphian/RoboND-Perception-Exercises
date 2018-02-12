@@ -20,7 +20,7 @@ def pcl_callback(pcl_msg):
     # TODO: PassThrough Filter
     passthrough = cloud_filtered.make_passthrough_filter()
     passthrough.set_filter_field_name('z')
-    z_min = 0.75
+    z_min = 0.76
     z_max = 1.1
     passthrough.set_filter_limits(z_min, z_max)
     cloud_filtered = passthrough.filter()
