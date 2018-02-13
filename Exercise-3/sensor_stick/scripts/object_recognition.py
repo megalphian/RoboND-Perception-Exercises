@@ -63,8 +63,9 @@ def pcl_callback(pcl_msg):
     ec = white_cloud.make_EuclideanClusterExtraction()
     # Set tolerances for distance threshold 
     # as well as minimum and maximum cluster size (in points)
-    ec.set_ClusterTolerance(0.075)
-    ec.set_MinClusterSize(10)
+    ec.set_ClusterTolerance(0.045)
+    ec.set_MinClusterSize(200)
+    #ec.set_MaxClusterSize(1000)
     # Search the k-d tree for clusters
     ec.set_SearchMethod(tree)
     # Extract indices for each of the discovered clusters
@@ -107,13 +108,13 @@ def pcl_callback(pcl_msg):
 
         # Grab the points for the cluster
         pcl_cluster = cloud_objects.extract(pts_list)
-        pcl_cluster_ros = pcl_to_ros(pcl_cluster)
+        cluster_ros = pcl_to_ros(pcl_cluster)
 
         # Compute the associated feature vector
-        colour_hists = compute_color_histograms(pcl_cluster_ros)
-        cluster_norms = get_normals(pcl_cluster_ros)
+        colour_hists = compute_color_histograms(cluster_ros)
+        cluster_norms = get_normals(cluster_ros)
         normal_hists = compute_normal_histograms(cluster_norms)
-        feature = np.concatenate(colour_hists, normal_hists)
+        feature = np.concatenate((colour_hists, normal_hists))
 
         # Make the prediction
         prediction = clf.predict(scaler.transform(feature.reshape(1,-1)))
@@ -128,7 +129,7 @@ def pcl_callback(pcl_msg):
         # Add the detected object to the list of detected objects.
         do = DetectedObject()
         do.label = label
-        do.cloud = ros_cluster
+        do.cloud = cluster_ros
         detected_objects.append(do)
 
     rospy.loginfo('Detected {} objects: {}'.format(len(detected_objects_labels), detected_objects_labels))
